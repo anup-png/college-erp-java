@@ -1,5 +1,5 @@
 package com.erp.collegeerp.dto;
-import com.erp.collegeerp.model.Role;
+
 import lombok.*;
 
 @Data
@@ -7,6 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 public class UserResponse {
     private Long id;
+    private String fullName;
     private String username;
     private String email;
     private Role role;

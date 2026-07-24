@@ -1,7 +1,6 @@
 package com.erp.collegeerp.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -11,28 +10,23 @@ import java.util.UUID;
 
 @Entity
 @Table(
-        name = "users",
+        name = "permission",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_user_email", columnNames = "email")
+                @UniqueConstraint(name = "uk_permission_name", columnNames = "name")
         }
 )
-public class User {
+public class Permission {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Email(message = "Invalid email")
-    @NotBlank(message = "Email is required")
-    @Column(nullable = false, unique = true, length = 255)
-    private String email;
+    @NotBlank(message = "Permission name is required")
+    @Column(nullable = false, length = 100)
+    private String name;
 
-    @NotBlank(message = "Password is required")
-    @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false)
-    private Boolean enabled = true;
+    @Column(length = 255)
+    private String description;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -52,29 +46,20 @@ public class User {
         this.id = id;
     }
 
-    public String getEmail() {
-        return email;
+    public String getName() {
+        return name;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getPassword() {
-        return password;
+    public String getDescription() {
+        return description;
     }
 
-    // Store BCrypt hashed password only
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Boolean getEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public LocalDateTime getCreatedAt() {

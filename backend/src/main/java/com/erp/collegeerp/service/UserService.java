@@ -4,55 +4,59 @@ import com.erp.collegeerp.dto.RegisterRequest;
 import com.erp.collegeerp.dto.UserResponse;
 import com.erp.collegeerp.model.User;
 import com.erp.collegeerp.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
-
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
+    public UserResponse registerUser(RegisterRequest request) {
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+        if (request.getFullName() == null || request.getFullName().isBlank()) {
+            throw new IllegalArgumentException("Full name is required");
+        }
+        if (request.getUsername() == null || request.getUsername().isBlank()) {
+            throw new IllegalArgumentException("Username is required");
+        }
+        if (request.getEmail() == null || request.getEmail().isBlank()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Password is required");
+        }
+        if (request.getRole() == null) {
+            throw new IllegalArgumentException("Role is required");
+        }
 
-    // Register a new user
-    public UserResponse saveUser(RegisterRequest request) {
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already taken");
+        }
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already registered");
+        }
+
         User user = new User();
+        user.setFullName(request.getFullName());
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole());
+        user.setActive(true);
 
         User savedUser = userRepository.save(user);
 
-        return convertToResponse(savedUser);
-    }
-
-    // Get all users
-    public List<UserResponse> getAllUsers() {
-        List<User> users = userRepository.findAll();
-
-        List<UserResponse> response = new ArrayList<>();
-        for (User user : users) {
-            response.add(convertToResponse(user));
-        }
-        return response;
-    }
-
-    // Convert User entity to UserResponse DTO
-    private UserResponse convertToResponse(User user) {
-        UserResponse response = new UserResponse();
-        response.setId(user.getId());
-        response.setUsername(user.getUsername());
-        response.setEmail(user.getEmail());
-        response.setRole(user.getRole());
-        response.setActive(user.isActive());
-        return response;
+        return new UserResponse(
+                savedUser.getId(),
+                savedUser.getFullName(),
+                savedUser.getUsername(),
+                savedUser.getEmail(),
+                savedUser.getRole(),
+                savedUser.isActive()
+        );
     }
 }
